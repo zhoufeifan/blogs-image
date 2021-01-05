@@ -2,7 +2,8 @@ const http = require("http");
 const Path = require("path");
 const fs = require("fs");
 
-// todo 添加 gzip
+// todo 添加gzip压缩
+// todo 缓存控制
 const server = http.createServer(function (req,res){
     const fileName=Path.resolve(__dirname,"."+req.url);
     const extName=Path.extname(fileName).substr(1);
@@ -31,7 +32,7 @@ const server = http.createServer(function (req,res){
         if (mineTypeMap[extName]) {
             res.setHeader('Content-Type', mineTypeMap[extName]);
         }
-        var stream=fs.createReadStream(fileName);
+        var stream = fs.createReadStream(fileName);
         stream.pipe(res);
     }
 
