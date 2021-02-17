@@ -8,11 +8,7 @@ const fs = require("fs");
 const server = http.createServer(function (req,res){
     const fileName = Path.resolve(__dirname,"."+req.url);
     const extName = Path.extname(fileName).substr(1);
-    // res.setHeader('Cache-Control', 'max-age=20')
-    const buffer = fs.readFileSync(fileName);
-    const hash = crypto.createHash('md5').update(buffer, 'utf8').digest('hex');
-    res.setHeader('Cache-Control', 'max-age=300')
-    res.setHeader('Etag', hash)
+    // res.setHeader('Cache-Control', 'no-cache')
     // res.setHeader('last-modified', new Date().toUTCString())
     // if (new Date(req.headers['if-modified-since']).getTime() + 30 * 1000 > Date.now()) {
     //     console.log('协商缓存命中....')
@@ -20,12 +16,6 @@ const server = http.createServer(function (req,res){
     //     res.end()
     //     return
     // }
-    if(req.headers['if-none-match'] === hash){
-        console.log('Etag协商缓存命中.....')
-        res.statusCode = 304
-        res.end()
-        return 
-      }
     if (fs.existsSync(fileName)) { //判断本地文件是否存在
         var mineTypeMap={
             html:'text/html;charset=utf-8',
@@ -48,14 +38,28 @@ const server = http.createServer(function (req,res){
             woff2:"font/woff2",
         }
         if (mineTypeMap[extName]) {
+            const buffer = fs.readFileSync(fileName);
+            const hash = crypto.createHash('md5').update(buffer, 'utf8').digest('hex');
+            res.setHeader('Cache-Control', 'max-age=300')
+            res.setHeader('Etag', hash)
             res.setHeader('Content-Type', mineTypeMap[extName]);
+            if(req.headers['if-none-match'] === hash){
+                console.log('Etag协商缓存命中.....')
+                res.statusCode = 304
+                res.end()
+                return 
+            }
         }
         var stream = fs.createReadStream(fileName);
         stream.pipe(res);
+    } else {
+        res.end(`
+        <html>
+            emmmm.....
+        </html>
+        `)
     }
-
-    
 })
-server.listen(8080, ()=>{
-    console.log('starting at http://localhost:8080')
+server.listen(3001, ()=>{
+    console.log('starting at http://localhost:3001')
 });
