@@ -33,7 +33,8 @@ const server = http.createServer(function (req,res){
             // 设置last-modified
             const stat = fs.statSync(fileName)
             const lastModifiedTime = stat.ctime.toGMTString();
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Cache-Control', 'max-age=300')
             res.setHeader('last-modified', lastModifiedTime);
             if (new Date(req.headers['if-modified-since']).getTime() === new Date(lastModifiedTime).getTime()) {
                 console.log('协商缓存命中....')
